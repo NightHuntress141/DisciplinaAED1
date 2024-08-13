@@ -1,14 +1,16 @@
 #include <stdlib.h>
 #include <stdio.h>
+#define MAX 5
 
 typedef struct aux {
-
+  
   /* COMPLETAR */
 
 } PESSOA;
 
 PESSOA* inicializar(int id){
-
+  PESSOA A[MAX];
+  int nroElem;
   /* COMPLETAR */
 
 }
