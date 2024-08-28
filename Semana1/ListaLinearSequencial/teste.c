@@ -31,7 +31,6 @@ void ExibirLista (LISTA *lista1){
     for (i = 0; i < lista1 -> nElem; i++){
         printf("%i \n", lista1 -> l[i].chave);
     }
-    return 0;
 }
 
 /*Esta função recebe o valor da lista1 e da chave que se deseja procurar 
@@ -46,6 +45,7 @@ int BuscaSequencial (LISTA *lista1, int ch){
             continue;
         }
     }
+    return 0;
 }
 
 /*Esta função recebe o valor da lista e da nova chave que se deseja inserir 
@@ -101,15 +101,14 @@ int InserirInicio (LISTA *lista1, REGISTRO *ch_nova){
 
 /*Esta função recebe o valor da lista e da chave que se deseja excluir 
 e devolve ou um valor que indica que a chave não existe na lista (-1) ou uma operação bem sucedida de exclusão (0)*/
-int ExcluirElemento (LISTA *lista1, int *excluir_chave){
-    int p, j;
-    p = BuscaSequencial(&lista1, &excluir_chave);
+int ExcluirElemento (LISTA *lista1, int *p){
+    int j;
 
-    if (p == -1){
+    if (*p == -1){
         return -1;
     }
 
-    for (j = p; j < lista1 -> nElem; j++){
+    for (j = *p; j < lista1 -> nElem; j++){
         lista1 -> l[j] = lista1 -> l[j + 1];
     }
 
@@ -123,24 +122,56 @@ void ReinicializarLista(LISTA *lista1){
     lista1 -> nElem = 0;
 }
 
+/*Esta função recebe o valor da lista e da nova chave que se deseja inserir 
+e devolve ou um erro por estar cheia (-1) ou uma operação bem sucedida (0)*/
+int InsertionSort(LISTA *lista1, REGISTRO *ch_nova){
+    if (lista1 -> nElem >= MAX){
+        return -1;
+    }
+
+    int pos = lista1 -> nElem;
+
+    while (pos > 0 && lista1 -> l[pos - 1] > *ch_nova.chave){
+        lista1 -> l[pos] = lista1 -> l[pos - 1];
+        pos--;
+    }
+
+    lista1 -> l[pos] = *ch_nova;
+    lista1 -> nElem++;
+    return 0;
+}
+
 int main(){
     LISTA lista1;
     
-    int nElem = InicializarLista(&lista1);
+    InicializarLista(&lista1);
     
+    //Criação de uma pequena lista inicial
+    for (int i = 0; i < 5; i++){
+        REGISTRO reg = {.chave = i * i};
+        InserirFinal(&lista1, &reg);
+    }
+
     ExibirLista(&lista1);
     
     int ch_buscada;
-    int posição_busca_sequencial;
+    int posicao_busca_sequencial;
     printf("Insira o valor que deseja ser buscado: ");
-    scanf("%i \n", &ch_buscada);
-    posição_busca_sequencial = BuscaSequencial(&lista1, &ch_buscada);
-    printf("Tal valor se encontra na posição: %i \n", posição_busca_sequencial);
+    scanf("%i", &ch_buscada);
+    posicao_busca_sequencial = BuscaSequencial(&lista1, ch_buscada);
+    do{
+        if (posicao_busca_sequencial == -1){
+            printf("Este elemento não foi encontrado na lista! \n");
+        }
+        else{
+            printf("Tal valor se encontra na posição: %d \n", posicao_busca_sequencial + 1);
+        }
+    }while (false);
 
     REGISTRO novo_reg1;
     int resultado_inserir_final;
     printf("Insira o valor que se deseja adicionar no final da lista: ");
-    scanf("%i \n", &novo_reg1.chave);
+    scanf("%i", &novo_reg1.chave);
     resultado_inserir_final = InserirFinal(&lista1, &novo_reg1.chave);
     //Como evitar que o programa fique repetidamente perguntando?
     do{
@@ -155,10 +186,10 @@ int main(){
     REGISTRO novo_reg2;
     int posicao_chave;
     int resultado_inserir_em_X;
-    printf("Insira o Valor que se deseja ser adicionado na lista: ");
-    scanf("%i \n", &novo_reg2.chave);
-    printf("Insira a posição que se deseja colocar o valor [0-%i]: ", MAX);
-    scanf("%i \n", &posicao_chave);
+    printf("Insira o valor que se deseja ser adicionado na lista: ");
+    scanf("%i", &novo_reg2.chave);
+    printf("Insira a posição que se deseja colocar o valor [0-%i]: ", lista1.nElem);
+    scanf("%i", &posicao_chave);
     resultado_inserir_em_X = InserirEmX(&lista1, &novo_reg2.chave, &posicao_chave);
     do{
         if (resultado_inserir_em_X == -1){
@@ -178,7 +209,7 @@ int main(){
     REGISTRO novo_reg3;
     int resultado_inserir_inicio;
     printf("Insira o valor que se deseja adicionar no final da lista: ");
-    scanf("%i \n", &novo_reg3.chave);
+    scanf("%i", &novo_reg3.chave);
     resultado_inserir_inicio = InserirInicio(&lista1, &novo_reg3.chave);
     do{
         if (resultado_inserir_inicio == -1){
@@ -191,9 +222,11 @@ int main(){
 
     REGISTRO excluir_reg1;
     int resultado_excluir;
+    int pos;
     printf("Insira o valor que deseja deletar da lista: ");
-    scanf("%i \n", &excluir_reg1);
-    resultado_excluir = ExcluirElemento(&lista1, &excluir_reg1);
+    scanf("%i", &excluir_reg1.chave);
+    pos = BuscaSequencial(&lista1, &excluir_reg1);
+    resultado_excluir = ExcluirElemento(&lista1, &pos);
     do{
         if (resultado_excluir == -1){
             printf("Não foi possivel deletar, pois o valor não se encontra na lista! \n");
@@ -203,7 +236,22 @@ int main(){
         }
     }while(false);
 
+    REGISTRO novo_reg4;
+    int resultado_insertion_sort;
+    printf("Insira o valor que se deseja adicionar no final da lista: ");
+    scanf("%i", &novo_reg4.chave);
+    resultado_insertion_sort = InsertionSort(&lista1, &novo_reg4.chave);
+    do{
+        if (resultado_insertion_sort == -1){
+            printf("Não foi possivel inserir, pois a lista se encontra cheia! \n");
+        }
+        else{
+            printf("Inserção bem sucedida! \n");
+        }
+    }while (false);
+
+
     ReinicializarLista(&lista1);
 
-
+    return 0;
 }
